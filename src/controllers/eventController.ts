@@ -1,0 +1,141 @@
+import { Request, Response } from 'express'
+import { SortOrder } from 'mongoose'
+import Event from '../models/eventModel'
+import { UserRole } from '../models/userModel'
+
+export const getEvents = async (req: Request, res: Response) => {
+  const user = (req as any).user
+
+  // Extract query parameters
+  const {
+    title,
+    date,
+    location,
+    sort = 'createdAt:desc',
+    page = '1',
+    limit = '10',
+  } = req.query as {
+    title?: string
+    date?: string
+    location?: string
+    sort?: string
+    page?: string
+    limit?: string
+  }
+
+  // Build base filter
+  const filter: Record<string, any> =
+    user.role === UserRole.ADMIN ? {} : { userId: user._id }
+  if (title) filter.title = { $regex: title, $options: 'i' }
+  if (date) filter.date = date
+  if (location) filter.location = { $regex: location, $options: 'i' }
+
+  // Parse sorting
+  const [sortField, sortOrder] = sort.split(':')
+  const sortObj: Record<string, SortOrder> = {
+    [sortField]: sortOrder === 'desc' ? -1 : 1,
+  }
+
+  // Parse pagination
+  const pageNum = Math.max(1, parseInt(page, 10))
+  const limitNum = Math.max(1, parseInt(limit, 10))
+  const skip = (pageNum - 1) * limitNum
+
+  try {
+    const [events, total] = await Promise.all([
+      Event.find(filter).sort(sortObj).skip(skip).limit(limitNum),
+      Event.countDocuments(filter),
+    ])
+
+    res.json({
+      data: events,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    })
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching events', error: err })
+  }
+}
+
+export const createEvent = async (req: Request, res: Response) => {
+  const user = (req as any).user
+
+  try {
+    const { title, description, date, location } = req.body
+
+    const event = await Event.create({
+      title,
+      description,
+      date,
+      location,
+      userId: user._id,
+    })
+
+    res.status(201).json(event)
+  } catch (err) {
+    res.status(400).json({ message: 'Error creating event', error: err })
+  }
+}
+
+export const updateEvent = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const user = (req as any).user
+  const { id } = req.params
+
+  try {
+    const event = await Event.findById(id)
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' })
+      return
+    }
+
+    // Only admin or event owner can update
+    if (
+      user.role !== UserRole.ADMIN &&
+      event.userId.toString() !== user._id.toString()
+    ) {
+      res.status(403).json({ message: 'Forbidden' })
+      return
+    }
+
+    const updated = await Event.findByIdAndUpdate(id, req.body, { new: true })
+    res.json(updated)
+  } catch (err) {
+    res.status(400).json({ message: 'Error updating event', error: err })
+  }
+}
+
+export const deleteEvent = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const user = (req as any).user
+  const { id } = req.params
+
+  try {
+    const event = await Event.findById(id)
+    if (!event) {
+      res.status(404).json({ message: 'Event not found' })
+      return
+    }
+
+    if (
+      user.role !== UserRole.ADMIN &&
+      event.userId.toString() !== user._id.toString()
+    ) {
+      res.status(403).json({ message: 'Forbidden' })
+      return
+    }
+
+    await event.deleteOne()
+    res.json({ message: 'Event deleted' })
+  } catch (err) {
+    res.status(400).json({ message: 'Error deleting event', error: err })
+  }
+}
