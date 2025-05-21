@@ -49,6 +49,7 @@ export const getEvents = async (req: Request, res: Response) => {
     ])
 
     res.json({
+      message: '  Events info list',
       data: events,
       meta: {
         total,
@@ -79,6 +80,7 @@ export const createEvent = async (req: Request, res: Response) => {
 
     res.status(201).json({
       data: event,
+      message: '  Events added',
     })
   } catch (err) {
     res
@@ -114,6 +116,7 @@ export const updateEvent = async (
 
     const updated = await Event.findByIdAndUpdate(id, req.body, { new: true })
     res.json({
+      message: '  Events info updated',
       data: updated,
     })
   } catch (err) {

@@ -81,7 +81,7 @@ export const getProfile = async (
     }
 
     const userObj = req.user.toObject?.() ?? req.user
-    const { passwordHash, ...safeUser } = userObj
+    const { password, ...safeUser } = userObj
 
     res.status(200).json({
       data: safeUser,
