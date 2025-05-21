@@ -58,16 +58,17 @@ export const getEvents = async (req: Request, res: Response) => {
       },
     })
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching events', error: err })
+    res
+      .status(400)
+      .json({ message: 'Error fetching events', error: (err as Error).message })
   }
 }
 
 export const createEvent = async (req: Request, res: Response) => {
   const user = (req as any).user
 
+  const { title, description, date, location } = req.body
   try {
-    const { title, description, date, location } = req.body
-
     const event = await Event.create({
       title,
       description,
@@ -76,9 +77,13 @@ export const createEvent = async (req: Request, res: Response) => {
       userId: user._id,
     })
 
-    res.status(201).json(event)
+    res.status(201).json({
+      data: event,
+    })
   } catch (err) {
-    res.status(400).json({ message: 'Error creating event', error: err })
+    res
+      .status(400)
+      .json({ message: 'Error Create events', error: (err as Error).message })
   }
 }
 
@@ -108,9 +113,14 @@ export const updateEvent = async (
     }
 
     const updated = await Event.findByIdAndUpdate(id, req.body, { new: true })
-    res.json(updated)
+    res.json({
+      data: updated,
+    })
   } catch (err) {
-    res.status(400).json({ message: 'Error updating event', error: err })
+    res.status(400).json({
+      message: 'Error Updating events',
+      error: (err as Error).message,
+    })
   }
 }
 
@@ -139,6 +149,9 @@ export const deleteEvent = async (
     await event.deleteOne()
     res.json({ message: 'Event deleted' })
   } catch (err) {
-    res.status(400).json({ message: 'Error deleting event', error: err })
+    res.status(400).json({
+      message: 'Error Deleting events',
+      error: (err as Error).message,
+    })
   }
 }

@@ -33,10 +33,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res
       .status(201)
-      .json({ user: { id: user._id, name, email, role: user.role }, token })
+      .json({ data: { id: user._id, name, email, role: user.role }, token })
   } catch (error) {
     res
-      .status(500)
+      .status(400)
       .json({ message: 'Registration failed', error: (error as Error).message })
   }
 }
@@ -65,7 +65,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.json({ message: 'Login successful', token })
   } catch (error) {
     res
-      .status(500)
+      .status(400)
       .json({ message: 'Login failed', error: (error as Error).message })
   }
 }
@@ -74,17 +74,24 @@ export const getProfile = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ success: false, message: 'Unauthorized' })
-    return
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' })
+      return
+    }
+
+    const userObj = req.user.toObject?.() ?? req.user
+    const { passwordHash, ...safeUser } = userObj
+
+    res.status(200).json({
+      data: safeUser,
+      message: `Welcome back, ${safeUser.name}`,
+    })
+  } catch (error) {
+    console.error('Error fetching profile:', error)
+
+    res.status(400).json({
+      message: 'Something went wrong while fetching profile',
+    })
   }
-
-  const userObj = req.user.toObject?.() ?? req.user
-  const { passwordHash, ...safeUser } = userObj
-
-  res.status(200).json({
-    success: true,
-    data: safeUser,
-    message: `Welcome back, ${safeUser.name}`,
-  })
 }

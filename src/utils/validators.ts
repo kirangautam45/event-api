@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { body, validationResult, ValidationChain } from 'express-validator'
+import mongoose from 'mongoose'
 
 import User from '../models/userModel'
-import mongoose from 'mongoose'
 import { UserRole } from './contant'
 
 // Validate MongoDB ObjectId
@@ -94,8 +94,7 @@ export const createEventValidator = [
     .isString()
     .withMessage('Location must be a string'),
   body('userId')
-    .notEmpty()
-    .withMessage('User ID is required')
+    .optional()
     .isMongoId()
     .withMessage('User ID must be a valid Mongo ID'),
 ]
