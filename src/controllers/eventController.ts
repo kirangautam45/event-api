@@ -49,7 +49,7 @@ export const getEvents = async (req: Request, res: Response) => {
     ])
 
     res.json({
-      message: '  Events info list',
+      message: 'Events info list',
       data: events,
       meta: {
         total,
@@ -79,8 +79,8 @@ export const createEvent = async (req: Request, res: Response) => {
     })
 
     res.status(201).json({
+      message: ' Events added',
       data: event,
-      message: '  Events added',
     })
   } catch (err) {
     res
