@@ -1,3 +1,7 @@
+import dotenv from 'dotenv'
+// 🌱 Load environment variables
+dotenv.config()
+
 import mongoose from 'mongoose'
 import app from './app'
 
