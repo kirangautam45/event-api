@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import { SortOrder } from 'mongoose'
 import Event from '../models/eventModel'
-import { UserRole } from '../models/userModel'
+import { isValidObjectId } from '../utils/validators'
+import { UserRole } from '../utils/contant'
 
 export const getEvents = async (req: Request, res: Response) => {
   const user = (req as any).user
@@ -89,6 +90,8 @@ export const updateEvent = async (
   const { id } = req.params
 
   try {
+    if (!isValidObjectId(id, res)) return
+
     const event = await Event.findById(id)
     if (!event) {
       res.status(404).json({ message: 'Event not found' })

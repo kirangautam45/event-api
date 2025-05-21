@@ -1,17 +1,6 @@
 import { Schema, model, Document } from 'mongoose'
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
-
-export interface IUser extends Document {
-  _id: string
-  name: string
-  email: string
-  password: string
-  role: UserRole
-}
+import { IUser } from '../types/event'
+import { UserRole } from '../utils/contant'
 
 const UserSchema = new Schema<IUser>(
   {

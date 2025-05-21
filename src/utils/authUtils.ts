@@ -1,21 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken'
-import { IUser } from '../models/userModel'
-import { Document } from 'mongoose'
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: IUser & Document
-      userId?: string
-    }
-  }
-}
-
-export type CustomJwtPayload = {
-  userId: string
-  email: string
-  role: string
-}
+import { CustomJwtPayload } from '../types/event'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h'

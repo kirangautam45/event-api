@@ -1,12 +1,5 @@
-import { Schema, model, Document, Types } from 'mongoose'
-
-export interface IEvent extends Document {
-  title: string
-  description: string
-  date: Date
-  location: string
-  userId: Types.ObjectId
-}
+import { Schema, model } from 'mongoose'
+import { IEvent } from '../types/event'
 
 const EventSchema = new Schema<IEvent>(
   {
