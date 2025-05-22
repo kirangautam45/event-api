@@ -27,7 +27,11 @@ export const getEvents = async (req: Request, res: Response) => {
   // Build base filter
   const filter: Record<string, any> =
     user.role === UserRole.ADMIN ? {} : { userId: user._id }
-  if (title) filter.title = { $regex: title, $options: 'i' }
+  if (title?.trim()) {
+    const escaped = title.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // escape regex
+    const flexibleRegex = escaped.replace(/[\/\-\s]+/g, '.*')
+    filter.title = { $regex: flexibleRegex, $options: 'i' }
+  }
   if (date) filter.date = date
   if (location) filter.location = { $regex: location, $options: 'i' }
 
