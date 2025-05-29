@@ -8,7 +8,7 @@ export const authenticate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '')
+    const token = req.header('Authorization')?.split(' ')[1]
     if (!token) {
       res.status(401).json({ message: 'Unauthorized' })
       return
